@@ -117,8 +117,8 @@ class Player:
         self.last_death = None
     
     def spawn(self):
-        # Add death protection for 1 second
-        if self.last_death != None and dt.now() < self.last_death + td(seconds=1):
+        # Add death protection for 2 seconds
+        if self.last_death != None and dt.now() < self.last_death + td(seconds=2):
             return
         
         self.last_death = dt.now()
