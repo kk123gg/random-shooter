@@ -1,3 +1,8 @@
+# Simple arcade shooter game
+# Monster spawns every 5 points
+# Moving monsters spawn after 20 points
+# Lifepack drops every 15 points
+
 import pygame
 import time
 from datetime import datetime as dt
@@ -39,7 +44,7 @@ class Monster:
         self.bullet_speed = level
 
         self.count = -1
-        self.time = dt.now().second
+        self.last_shot = dt.now()
 
     def spawn(self):
         if self.y + self.height < 0:
@@ -72,8 +77,8 @@ class Monster:
             self.count = 0
             return
 
-        if dt.now().second != self.time:
-            self.time = dt.now().second
+        if dt.now().second != self.last_shot.second:
+            self.last_shot = dt.now()
             self.count += 1
         
         if self.count == 5:
@@ -239,7 +244,6 @@ class Game:
 
     def new_game(self):
         self.score = 0
-        self.kills = 0
 
         self.player = Player()
         self.monsters = [Monster(1)]
@@ -302,7 +306,7 @@ class Game:
 
     def check_hit(self):
         # Check if player hits a monster
-        for bullet in self.player.bullets:
+        for i, bullet in enumerate(self.player.bullets):
             for monster in self.monsters:
                 if monster.y + monster.height < 0:
                     continue
@@ -318,12 +322,14 @@ class Game:
 
         # Check if a monster hits the player
         for monster in self.monsters:
-            for bullet in monster.bullets:
+            for i, bullet in enumerate(monster.bullets):
                 if ((self.player.x <= bullet[0] <= self.player.x + self.player.width
                         or self.player.x <= bullet[0] + monster.bullet_width <= self.player.x + self.player.width)
                     and (self.player.y <= bullet[1] <= self.player.y + self.player.height
                         or self.player.y <= bullet[1] + monster.bullet_height <= self.player.y + self.player.height)):
                     self.player.spawn()
+                    monster.bullets[i] = [0, Game.size()[1] + 100]
+
 
             if ((monster.x <= self.player.x <= monster.x + monster.width
                     or monster.x <= self.player.x + self.player.width <= monster.x + monster.width)
@@ -374,7 +380,6 @@ class Game:
         self.clock.tick(60)
 
     def add_monster(self):
-
         level = min(5, self.score // 10 + 1)
         self.monsters.append(Monster(level))
 
