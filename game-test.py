@@ -28,8 +28,8 @@ class Monster:
         else:
             self.stationary = False
             self.velocity = level
-            self.move_start = randint(0, Game.size()[0]/2)
-            self.move_end = self.move_start + Game.size()[0]/2
+            self.move_start = randint(0, Game.width()/2)
+            self.move_end = self.move_start + Game.width()/2
 
         self.width = pygame.image.load('monster.png').get_width()
         self.height = pygame.image.load('monster.png').get_height()
@@ -37,7 +37,7 @@ class Monster:
         self.bullet_width = pygame.image.load('coin.png').get_width()
         self.bullet_height = pygame.image.load('coin.png').get_height()
 
-        self.x = randint(0, Game.size()[0] - self.width)
+        self.x = randint(0, Game.width() - self.width)
         self.y = randint(-1000, 0 - self.height)
 
         self.bullets = []
@@ -50,7 +50,7 @@ class Monster:
         if self.y + self.height < 0:
             return
 
-        self.x = randint(0, Game.size()[0] - self.width)
+        self.x = randint(0, Game.width() - self.width)
         self.y = randint(-1000, 0 - self.height)
 
     def move(self):
@@ -88,7 +88,7 @@ class Monster:
         # Remove bullets that are out of screen
         remove_bullets = []
         for bullet in self.bullets:
-            if bullet[1] > Game.size()[1]:
+            if bullet[1] > Game.height():
                 remove_bullets.append(bullet)
         
         for bullet in remove_bullets:
@@ -105,8 +105,8 @@ class Player:
         self.bullet_width = pygame.image.load('coin.png').get_width()
         self.bullet_height = pygame.image.load('coin.png').get_height()
 
-        self.x = Game.size()[0]/2 - self.width/2
-        self.y = Game.size()[1]/2 - self.height/2
+        self.x = Game.width()/2 - self.width/2
+        self.y = Game.height()/2 - self.height/2
 
         self.to_left = False
         self.to_right = False
@@ -128,8 +128,8 @@ class Player:
         
         self.last_death = dt.now()
 
-        self.x = Game.size()[0]/2 - self.width/2
-        self.y = Game.size()[1]/2 - self.height/2
+        self.x = Game.width()/2 - self.width/2
+        self.y = Game.height()/2 - self.height/2
 
         self.lives -= 1
 
@@ -139,13 +139,13 @@ class Player:
             self.x = max(0, self.x)
         if self.to_right:
             self.x += self.velocity
-            self.x = min(self.x, Game.size()[0] - self.width)
+            self.x = min(self.x, Game.width() - self.width)
         if self.to_up:
             self.y -= self.velocity
             self.y = max(0, self.y)
         if self.to_down:
             self.y += self.velocity
-            self.y = min(self.y, Game.size()[1] - self.height)
+            self.y = min(self.y, Game.height() - self.height)
 
     def shoot(self):
         if self.shooting:
@@ -170,7 +170,7 @@ class LifePack:
         self.spawn()
 
     def spawn(self):
-        self.x = randint(0, Game.size()[0] - self.width)
+        self.x = randint(0, Game.width() - self.width)
         self.y = -100
         self.drop = False
     
@@ -178,7 +178,7 @@ class LifePack:
         if self.drop:
             self.y += 1
         
-        if self.y > Game.size()[1]:
+        if self.y > Game.height():
             self.spawn()
 
 
@@ -186,12 +186,20 @@ class Game:
     @classmethod
     def size(cls):
         return 1024, 768
+    
+    @classmethod
+    def width(cls):
+        return Game.size()[0]
+
+    @classmethod
+    def height(cls):
+        return Game.size()[1]
 
     def __init__(self):
         pygame.init()
 
-        self.width = Game.size()[0]
-        self.height = Game.size()[1]
+        self.width = Game.width()
+        self.height = Game.height()
 
         self.window = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption('Shooter')
@@ -328,7 +336,7 @@ class Game:
                     and (self.player.y <= bullet[1] <= self.player.y + self.player.height
                         or self.player.y <= bullet[1] + monster.bullet_height <= self.player.y + self.player.height)):
                     self.player.spawn()
-                    monster.bullets[i] = [0, Game.size()[1] + 100]
+                    monster.bullets[i] = [0, Game.height() + 100]
 
 
             if ((monster.x <= self.player.x <= monster.x + monster.width
